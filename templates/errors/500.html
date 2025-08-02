@@ -1,0 +1,43 @@
+{% extends "errors/base_error.html" %}
+
+{% block title %}Server Error - Super Arbitrage{% endblock %}
+
+{% block error_content %}
+    <div class="error-icon text-danger">
+        <i class="fas fa-exclamation-circle"></i>
+    </div>
+    <h1 class="display-4 fw-bold text-danger">500</h1>
+    <h2 class="h3 mb-4">Internal Server Error</h2>
+    <p class="lead text-muted">
+        Oops! Something went wrong on our end.
+    </p>
+    <p class="text-muted">
+        Our team has been notified and we're working to fix the issue.
+        Please try again later or contact support if the problem persists.
+    </p>
+    
+    {% if error_id %}
+    <div class="alert alert-warning mt-4 text-start">
+        <div class="d-flex">
+            <i class="fas fa-bug me-2 mt-1"></i>
+            <div>
+                <strong>Error Reference:</strong> {{ error_id }}
+                <div class="mt-1 small">Please include this ID when contacting support.</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Log the error to the console with additional debugging info
+    console.error('500 Error: Internal Server Error - {{ request.path }}');
+    
+    // In a production environment, you might want to log this to an error tracking service
+    // Example: logErrorToService('500', 'Internal Server Error', window.location.href, '{{ error_id }}');
+    
+    // If you're using an error tracking service like Sentry, you would initiate it here
+    // Example: Sentry.captureException(new Error('500 Internal Server Error'));
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+# Web Dashboard Configuration
+
+# Server settings
+server:
+  host: "0.0.0.0"  # Listen on all network interfaces
+  port: 5000
+  debug: true
+  secret_key: "your-secret-key-change-in-production"
+  session_timeout: 3600  # 1 hour in seconds
+
+# Authentication (if implemented later)
+auth:
+  enabled: false
+  username: "admin"
+  password_hash: ""  # Will be hashed on first run
+
+# Dashboard settings
+dashboard:
+  title: "Super Arbitrage Dashboard"
+  theme: "light"  # light, dark, or system
+  items_per_page: 25
+  refresh_interval: 300  # Auto-refresh every 5 minutes (in seconds)
+  max_log_entries: 1000
+
+# API settings
+api:
+  rate_limit: "200 per day"
+  enable_swagger: true
+  enable_cors: true
+  allowed_origins:
+    - "http://localhost:5000"
+    - "http://127.0.0.1:5000"
+
+# Features
+features:
+  realtime_updates: true
+  email_notifications: true
+  sms_notifications: false
+  data_export: true
+  bulk_actions: true
+
+# External services
+external_services:
+  sentry:
+    enabled: false
+    dsn: ""
+  google_analytics:
+    enabled: false
+    tracking_id: ""
+
+# UI Customization
+ui:
+  primary_color: "#4F46E5"
+  secondary_color: "#10B981"
+  logo_url: "/static/img/logo.png"
+  favicon: "/static/favicon.ico"
+  custom_css: ""
+
+# Performance
+performance:
+  cache_enabled: true
+  cache_timeout: 300  # 5 minutes
+  database_pool_size: 5
+  max_workers: 4
+
+# Development settings
+development:
+  debug_toolbar: true
+  reloader: true
+  profile: false
+  testing: false

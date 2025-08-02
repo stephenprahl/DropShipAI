@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}My Opportunities - Super Arbitrage{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-5">My Opportunities</h1>
+                <p class="lead mb-0">Your saved and recent arbitrage opportunities</p>
+            </div>
+            <a href="{{ url_for('find') }}" class="btn btn-primary">
+                <i class="fas fa-search-dollar me-2"></i> Find New
+            </a>
+        </div>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 col-lg-3 mb-4">
+        <!-- Filters -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Filters</h5>
+            </div>
+            <div class="card-body">
+                <form id="filterForm">
+                    <div class="mb-3">
+                        <label for="search" class="form-label">Search</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" id="search" placeholder="Search opportunities...">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="sourcePlatform" class="form-label">Source Platform</label>
+                        <select class="form-select" id="sourcePlatform">
+                            <option value="">All Platforms</option>
+                            <option value="amazon">Amazon</option>
+                            <option value="walmart">Walmart</option>
+                            <option value="aliexpress">AliExpress</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="targetPlatform" class="form-label">Target Platform</label>
+                        <select class="form-select" id="targetPlatform">
+                            <option value="">All Platforms</option>
+                            <option value="ebay">eBay</option>
+                            <option value="amazon">Amazon</option>
+                            <option value="etsy">Etsy</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Profit Range</label>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="minProfit" placeholder="Min" min="0" step="0.01">
+                            <span class="input-group-text">to</span>
+                            <input type="number" class="form-control" id="maxProfit" placeholder="Max">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Margin Range</label>
+                        <div class="input-group mb-2">
+                            <input type="number" class="form-control" id="minMargin" placeholder="Min %" min="0" max="1000">
+                            <span class="input-group-text">to</span>
+                            <input type="number" class="form-control" id="maxMargin" placeholder="Max %" min="0" max="1000">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Date Range</label>
+                        <div class="input-group mb-2">
+                            <input type="date" class="form-control" id="startDate">
+                            <span class="input-group-text">to</span>
+                            <input type="date" class="form-control" id="endDate">
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter me-1"></i> Apply Filters
+                        </button>
+                        <button type="reset" class="btn btn-outline-secondary">
+                            <i class="fas fa-undo me-1"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Saved Searches -->
+        <div class="card mt-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Saved Searches</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="#" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">Wireless Earbuds</h6>
+                        <small>3 days ago</small>
+                    </div>
+                    <p class="mb-1 small text-muted">Amazon → eBay</p>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">Smart Watches</h6>
+                        <small>1 week ago</small>
+                    </div>
+                    <p class="mb-1 small text-muted">Walmart → Facebook</p>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">Phone Accessories</h6>
+                        <small>2 weeks ago</small>
+                    </div>
+                    <p class="mb-1 small text-muted">AliExpress → Etsy</p>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8 col-lg-9">
+        <!-- Sort and Actions -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body py-2">
+                <div class="d-flex flex-wrap justify-content-between align-items-center">
+                    <div class="d-flex align-items-center mb-2 mb-md-0">
+                        <span class="me-2 text-nowrap">Sort by:</span>
+                        <select class="form-select form-select-sm" style="width: auto;">
+                            <option>Most Recent</option>
+                            <option>Highest Profit</option>
+                            <option>Highest Margin</option>
+                            <option>Lowest Price</option>
+                        </select>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary active">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Opportunities List -->
+        {% if opportunity_files %}
+            {% for file in opportunity_files %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-folder-open text-warning me-2"></i>
+                            {{ file.name.replace('opportunities_', '').replace('.json', '').replace('_', ' ') }}
+                        </h5>
+                        <div>
+                            <a href="{{ url_for('view_opportunity', filename=file.name) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i> View
+                            </a>
+                            <button class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-download me-1"></i> Export
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% with opportunities = [] %}
+                                {% for _ in range(3) %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">Sample Product {{ loop.index }}</h6>
+                                            <small class="text-muted">${{ loop.index * 10 }} profit</small>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <small class="text-muted">Source: ${{ 20 + loop.index * 5 }} → Target: ${{ 40 + loop.index * 10 }}</small>
+                                            <small class="text-success">{{ 30 + loop.index * 5 }}% margin</small>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted text-center py-2">
+                        <small>Showing 3 of 15 opportunities</small>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <!-- Pagination -->
+            <nav aria-label="Opportunities pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                <h3>No Opportunities Found</h3>
+                <p class="text-muted">You haven't saved any opportunities yet.</p>
+                <a href="{{ url_for('find') }}" class="btn btn-primary">
+                    <i class="fas fa-search-dollar me-2"></i> Find Opportunities
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize date pickers with default range (last 30 days)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+    
+    document.getElementById('startDate').valueAsDate = startDate;
+    document.getElementById('endDate').valueAsDate = endDate;
+    
+    // Handle filter form submission
+    const filterForm = document.getElementById('filterForm');
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // In a real application, this would filter the opportunities
+            console.log('Filters applied');
+        });
+    }
+    
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

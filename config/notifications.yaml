@@ -1,0 +1,174 @@
+# Notification Configuration
+
+# Email Settings
+email:
+  enabled: true
+  smtp_server: smtp.gmail.com
+  smtp_port: 587
+  smtp_username: your-email@gmail.com
+  smtp_password: your-app-password  # Use App Password for Gmail
+  sender_email: your-email@gmail.com
+  sender_name: SuperArb Bot
+  
+  # Email templates
+  templates:
+    arbitrage_opportunity: |
+      Subject: New Arbitrage Opportunity: {{ product_title }}
+      
+      Hello,
+      
+      We found a new arbitrage opportunity for you!
+      
+      Product: {{ product_title }}
+      Source: {{ source_platform|title }} - ${{ "%.2f"|format(source_price) }}
+      Target: {{ target_platform|title }} - ${{ "%.2f"|format(target_price) }}
+      Estimated Profit: ${{ "%.2f"|format(estimated_profit) }} ({{ "%.1f"|format(profit_margin) }}%)
+      
+      View on {{ source_platform|title }}: {{ source_url }}
+      
+      This is an automated message. Please do not reply.
+    
+    order_update: |
+      Subject: Order {{ order_status|title }} - {{ order_id }}
+      
+      Hello,
+      
+      Your order has been updated:
+      
+      Order ID: {{ order_id }}
+      Status: {{ order_status|title }}
+      
+      {% if product_name %}
+      Product: {{ product_name }}
+      {% endif %}
+      
+      {% if tracking_number %}
+      Tracking: {{ tracking_number }}
+      {% endif %}
+      
+      {% if estimated_delivery %}
+      Estimated Delivery: {{ estimated_delivery }}
+      {% endif %}
+      
+      Thank you for using SuperArb!
+    
+    error_alert: |
+      Subject: [ERROR] {{ error_type }}
+      
+      An error occurred in the SuperArb system:
+      
+      Error: {{ error_message }}
+      
+      Time: {{ timestamp }}
+      
+      {% if traceback %}
+      Traceback:
+      {{ traceback }}
+      {% endif %}
+      
+      This is an automated error notification.
+
+# SMS Settings
+sms:
+  enabled: false
+  provider: twilio  # Options: twilio, plivo, nexmo, etc.
+  
+  # Twilio Settings (if using Twilio)
+  twilio:
+    account_sid: your_account_sid
+    auth_token: your_auth_token
+    from_number: +1234567890
+  
+  # Message templates (160 chars or less)
+  templates:
+    arbitrage_opportunity: "New opp: {{ product_title|truncate(30) }} - Profit: ${{ "%.2f"|format(estimated_profit) }} ({{ "%.1f"|format(profit_margin) }}%)"
+    order_update: "Order {{ order_status|upper }}: {{ order_id }} - {{ product_name|truncate(20) }}"
+    error_alert: "[ERROR] {{ error_type|truncate(100) }}"
+
+# Notification Preferences
+preferences:
+  # Global notification settings
+  notify_on_opportunity: true
+  notify_on_order_update: true
+  notify_on_error: true
+  
+  # Notification methods (email, sms, both)
+  default_method: email
+  
+  # Time restrictions (24h format)
+  quiet_hours_start: 22:00
+  quiet_hours_end: 08:00
+  
+  # Minimum profit threshold for notifications
+  min_profit_threshold: 20.0  # USD
+  
+  # Error notification thresholds
+  error_notification_threshold: 3  # Number of errors before notification
+  error_notification_cooldown: 3600  # Seconds between error notifications for same error
+
+# Recipients
+recipients:
+  # Default recipients for all notifications
+  default:
+    - email: admin@example.com
+      phone: +1234567890
+  
+  # Specific recipients for different notification types
+  arbitrage_opportunities:
+    - email: opportunities@example.com
+  
+  order_updates:
+    - email: orders@example.com
+    - phone: +1987654321
+  
+  error_alerts:
+    - email: devops@example.com
+    - phone: +15551234567
+
+# Logging
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: logs/notifications.log
+  max_size: 10  # MB
+  backup_count: 5
+
+# Rate limiting
+rate_limiting:
+  enabled: true
+  max_emails_per_hour: 100
+  max_sms_per_day: 50
+  
+  # Cooldown periods (in seconds)
+  email_cooldown: 60
+  sms_cooldown: 300
+
+# Webhook integrations (optional)
+webhooks:
+  slack:
+    enabled: false
+    webhook_url: https://hooks.slack.com/services/...
+    channel: "#superarb-alerts"
+    username: "SuperArb Bot"
+    icon_emoji: ":robot_face:"
+  
+  discord:
+    enabled: false
+    webhook_url: ""
+    username: "SuperArb"
+    avatar_url: ""
+
+# Feature flags
+features:
+  # Enable/disable specific notification types
+  enable_email: true
+  enable_sms: false
+  enable_webhooks: false
+  
+  # Enable detailed logging of sent notifications
+  log_notifications: true
+  
+  # Store sent notifications in database
+  store_in_database: true
+
+# Version
+version: 1.0.0

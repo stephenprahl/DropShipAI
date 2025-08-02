@@ -1,0 +1,64 @@
+{% extends "errors/base_error.html" %}
+
+{% block title %}Too Many Requests - Super Arbitrage{% endblock %}
+
+{% block error_content %}
+    <div class="error-icon text-info">
+        <i class="fas fa-tachometer-alt"></i>
+    </div>
+    <h1 class="display-4 fw-bold text-info">429</h1>
+    <h2 class="h3 mb-4">Too Many Requests</h2>
+    <p class="lead text-muted">
+        You've sent too many requests in a short amount of time.
+    </p>
+    <p class="text-muted">
+        Please wait a few moments before trying again. This helps us maintain
+        optimal performance for all users.
+    </p>
+    
+    <div class="mt-4">
+        <div class="progress mb-3" style="height: 10px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
+                 style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" id="countdownBar">
+            </div>
+        </div>
+        <p class="small text-muted mb-0">
+            You can try again in <span id="countdown">60</span> seconds
+        </p>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Countdown timer
+    let timeLeft = 60; // seconds
+    const countdownElement = document.getElementById('countdown');
+    const countdownBar = document.getElementById('countdownBar');
+    
+    const timer = setInterval(function() {
+        timeLeft--;
+        const percentage = (timeLeft / 60) * 100;
+        
+        countdownElement.textContent = timeLeft;
+        countdownBar.style.width = percentage + '%';
+        
+        // Update progress bar color based on time left
+        if (timeLeft < 10) {
+            countdownBar.classList.remove('bg-info');
+            countdownBar.classList.add('bg-success');
+        }
+        
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            // Auto-refresh the page when countdown reaches 0
+            window.location.reload();
+        }
+    }, 1000);
+    
+    // Log the rate limit hit
+    console.warn('429 Too Many Requests: Rate limit exceeded - {{ request.path }}');
+    
+    // In a production environment, you might want to log this to an analytics service
+    // Example: logRateLimitHit(window.location.pathname);
+</script>
+{% endblock %}

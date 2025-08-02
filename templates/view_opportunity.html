@@ -1,0 +1,401 @@
+{% extends "base.html" %}
+
+{% block title %}{{ opportunity.source_product.title[:50] }}... - Super Arbitrage{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('opportunities') }}">My Opportunities</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Opportunity Details</li>
+            </ol>
+        </nav>
+        
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="display-5">Opportunity Details</h1>
+            <div class="btn-group" role="group">
+                <button class="btn btn-outline-primary">
+                    <i class="far fa-star me-1"></i> Save
+                </button>
+                <button class="btn btn-outline-secondary">
+                    <i class="fas fa-download me-1"></i> Export
+                </button>
+            </div>
+        </div>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Product Info -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <img src="{{ opportunity.source_product.get('image_url', url_for('static', filename='images/placeholder.png')) }}" 
+                             class="img-fluid rounded border product-image" 
+                             alt="{{ opportunity.source_product.title }}"
+                             data-fallback-src="{{ url_for('static', filename='images/placeholder.png') }}">
+                        
+                        <div class="d-grid gap-2 mt-3">
+                            <a href="{{ opportunity.source_product.url }}" target="_blank" class="btn btn-primary">
+                                <i class="fas fa-external-link-alt me-1"></i> View on {{ opportunity.source|title }}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <h2 class="h4">{{ opportunity.source_product.title }}</h2>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">Source ({{ opportunity.source|title }})</h6>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="h4 mb-0">${{ "%.2f"|format(opportunity.source_product.price) }}</span>
+                                            {% if opportunity.source_product.shipping %}
+                                                <span class="text-muted small">+ ${{ "%.2f"|format(opportunity.source_product.shipping) }} shipping</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">Target ({{ opportunity.target|title }})</h6>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="h4 mb-0">${{ "%.2f"|format(opportunity.target_price) }}</span>
+                                            <span class="text-muted small">Est. selling price</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-{{ 'success' if opportunity.profit_margin > 25 else 'info' }}">
+                            <div class="d-flex">
+                                <i class="fas {{ 'fa-check-circle' if opportunity.profit_margin > 25 else 'fa-info-circle' }} me-2 mt-1"></i>
+                                <div>
+                                    <strong>Profit:</strong> ${{ "%.2f"|format(opportunity.profit) }} 
+                                    ({{ "%.1f"|format(opportunity.profit_margin) }}% margin)
+                                    
+                                    {% if opportunity.profit_margin > 40 %}
+                                        <p class="mb-0 mt-1">Excellent profit margin! Consider listing at this price.</p>
+                                    {% elif opportunity.profit_margin > 25 %}
+                                        <p class="mb-0 mt-1">Good profit margin. Monitor competition for best results.</p>
+                                    {% else %}
+                                        <p class="mb-0 mt-1">Margin is relatively low. Consider finding similar products with better margins.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Details Tabs -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <ul class="nav nav-tabs card-header-tabs" id="productTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab" aria-controls="details" aria-selected="true">
+                            <i class="fas fa-info-circle me-1"></i> Details
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="false">
+                            <i class="fas fa-align-left me-1"></i> Description
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="productTabsContent">
+                    <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row" style="width: 40%;">Brand</th>
+                                            <td>{{ opportunity.source_product.brand or 'N/A' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Model</th>
+                                            <td>{{ opportunity.source_product.model or 'N/A' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">SKU</th>
+                                            <td>{{ opportunity.source_product.sku or 'N/A' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row" style="width: 40%;">Category</th>
+                                            <td>{{ opportunity.source_product.category or 'N/A' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Condition</th>
+                                            <td>{{ opportunity.source_product.condition or 'New' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Availability</th>
+                                            <td>
+                                                {% if opportunity.source_product.in_stock %}
+                                                    <span class="badge bg-success">In Stock</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Out of Stock</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="description" role="tabpanel" aria-labelledby="description-tab">
+                        {% if opportunity.source_product.description %}
+                            <div class="product-description">
+                                {{ opportunity.source_product.description|safe }}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No description available for this product.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Profit Calculator -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Profit Calculator</h5>
+            </div>
+            <div class="card-body">
+                <form id="profitCalculator">
+                    <div class="mb-3">
+                        <label for="sellingPrice" class="form-label">Selling Price ($)</label>
+                        <input type="number" class="form-control" id="sellingPrice" 
+                               value="{{ "%.2f"|format(opportunity.target_price) }}" step="0.01" min="0.01" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="sourceCost" class="form-label">Source Cost ($)</label>
+                        <input type="number" class="form-control" id="sourceCost" 
+                               value="{{ "%.2f"|format(opportunity.source_product.price) }}" step="0.01" min="0" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="shippingCost" class="form-label">Shipping Cost ($)</label>
+                        <input type="number" class="form-control" id="shippingCost" 
+                               value="{{ "%.2f"|format(opportunity.shipping_cost or 0) }}" step="0.01" min="0">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="platformFee" class="form-label">Platform Fee (%)</label>
+                        <input type="number" class="form-control" id="platformFee" 
+                               value="{{ "%.2f"|format((opportunity.fees / opportunity.target_price * 100) if opportunity.target_price > 0 else 10) }}" 
+                               step="0.1" min="0" max="100">
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <div class="d-flex justify-content-between">
+                            <strong>Profit:</strong>
+                            <span id="calculatedProfit">${{ "%.2f"|format(opportunity.profit) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <strong>Margin:</strong>
+                            <span id="calculatedMargin">{{ "%.1f"|format(opportunity.profit_margin) }}%</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-success">
+                        <i class="fas fa-plus-circle me-1"></i> Add to Inventory
+                    </button>
+                    <button class="btn btn-outline-primary">
+                        <i class="fas fa-tag me-1"></i> Create Listing
+                    </button>
+                    <button class="btn btn-outline-secondary">
+                        <i class="fas fa-chart-line me-1"></i> Track Competitors
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notes -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Notes</h5>
+                <button class="btn btn-sm btn-outline-primary" id="addNoteBtn">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div class="card-body" id="notesContainer">
+                <div class="text-center py-3 text-muted" id="noNotes">
+                    <i class="fas fa-sticky-note fa-2x mb-2"></i>
+                    <p class="mb-0">No notes yet. Click + to add one.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Handle image loading errors
+    document.querySelectorAll('.product-image').forEach(function(img) {
+        img.addEventListener('error', function() {
+            if (this.dataset.fallbackSrc) {
+                this.src = this.dataset.fallbackSrc;
+            }
+        });
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Profit Calculator
+    function updateProfit() {
+        const sellingPrice = parseFloat(document.getElementById('sellingPrice').value) || 0;
+        const sourceCost = parseFloat(document.getElementById('sourceCost').value) || 0;
+        const shippingCost = parseFloat(document.getElementById('shippingCost').value) || 0;
+        const platformFee = (parseFloat(document.getElementById('platformFee').value) || 0) / 100;
+        
+        const fees = sellingPrice * platformFee;
+        const profit = sellingPrice - sourceCost - shippingCost - fees;
+        const margin = (profit / sellingPrice) * 100;
+        
+        document.getElementById('calculatedProfit').textContent = '$' + profit.toFixed(2);
+        document.getElementById('calculatedMargin').textContent = margin.toFixed(1) + '%';
+    }
+    
+    // Add event listeners to calculator inputs
+    ['sellingPrice', 'sourceCost', 'shippingCost', 'platformFee'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateProfit);
+    });
+    
+    // Initialize calculator
+    updateProfit();
+    
+    // Notes functionality
+    const addNoteBtn = document.getElementById('addNoteBtn');
+    const notesContainer = document.getElementById('notesContainer');
+    const noNotes = document.getElementById('noNotes');
+    
+    function createNoteElement(noteText, isNew = false) {
+        const noteId = 'note-' + Date.now();
+        const noteElement = document.createElement('div');
+        noteElement.className = 'card mb-2';
+        noteElement.id = noteId;
+        noteElement.innerHTML = `
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="note-content" contenteditable="true">${noteText}</div>
+                    <button class="btn btn-sm btn-link text-danger delete-note" data-note-id="${noteId}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="text-end mt-1">
+                    <small class="text-muted note-time">${new Date().toLocaleString()}</small>
+                </div>
+            </div>
+        `;
+        
+        // Focus the new note if it's being created
+        if (isNew) {
+            setTimeout(() => {
+                const contentEditable = noteElement.querySelector('.note-content');
+                contentEditable.focus();
+                
+                // Place cursor at the end of the content
+                const range = document.createRange();
+                range.selectNodeContents(contentEditable);
+                range.collapse(false);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }, 0);
+        }
+        
+        return noteElement;
+    }
+    
+    // Add new note
+    addNoteBtn.addEventListener('click', function() {
+        if (noNotes) {
+            noNotes.style.display = 'none';
+        }
+        
+        const newNote = createNoteElement('', true);
+        notesContainer.prepend(newNote);
+    });
+    
+    // Delete note
+    notesContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.delete-note')) {
+            const noteId = e.target.closest('.delete-note').getAttribute('data-note-id');
+            const noteElement = document.getElementById(noteId);
+            if (noteElement) {
+                noteElement.remove();
+                
+                // Show "no notes" message if this was the last note
+                if (notesContainer.children.length === 1) { // Only the noNotes div remains
+                    noNotes.style.display = 'block';
+                }
+            }
+        }
+    });
+    
+    // Save note on blur
+    notesContainer.addEventListener('blur', function(e) {
+        if (e.target.classList.contains('note-content')) {
+            // In a real app, you would save the note to the server here
+            console.log('Note saved:', e.target.textContent);
+            
+            // Update the timestamp
+            const timeElement = e.target.closest('.card-body').querySelector('.note-time');
+            if (timeElement) {
+                timeElement.textContent = 'Edited: ' + new Date().toLocaleString();
+            }
+        }
+    }, true); // Using capture phase for event delegation
+    
+    // Handle Enter key to save note
+    notesContainer.addEventListener('keydown', function(e) {
+        if (e.target.classList.contains('note-content') && e.key === 'Enter') {
+            e.preventDefault();
+            e.target.blur();
+        }
+    });
+</script>
+{% endblock %}

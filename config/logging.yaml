@@ -1,0 +1,97 @@
+# Logging configuration
+version: 1
+disable_existing_loggers: false
+formatters:
+  standard:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+  json:
+    class: pythonjsonlogger.jsonlogger.JsonFormatter
+    format: "%(asctime)s %(name)s %(levelname)s %(message)s"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: standard
+    stream: ext://sys.stdout
+
+  file:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: standard
+    filename: logs/arbitrage.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 5
+    encoding: utf8
+
+  error_file:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: standard
+    filename: logs/error.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 5
+    encoding: utf8
+
+  json_file:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: json
+    filename: logs/arbitrage.json
+    maxBytes: 10485760  # 10MB
+    backupCount: 5
+    encoding: utf8
+
+loggers:
+  root:
+    level: INFO
+    handlers: [console, file, error_file, json_file]
+    propagate: no
+
+  # Application specific loggers
+  arbitrage:
+    level: DEBUG
+    handlers: [console, file, json_file]
+    propagate: no
+
+  scraping:
+    level: INFO
+    handlers: [console, file, json_file]
+    propagate: no
+
+  database:
+    level: INFO
+    handlers: [file, json_file]
+    propagate: no
+
+  api:
+    level: DEBUG
+    handlers: [console, file, json_file]
+    propagate: no
+
+  notifications:
+    level: INFO
+    handlers: [console, file, json_file]
+    propagate: no
+
+  dashboard:
+    level: INFO
+    handlers: [console, file, json_file]
+    propagate: no
+
+  # Third-party loggers
+  requests:
+    level: WARNING
+    handlers: [file, json_file]
+    propagate: no
+
+  selenium:
+    level: WARNING
+    handlers: [file, json_file]
+    propagate: no
+
+  urllib3:
+    level: WARNING
+    handlers: [file, json_file]
+    propagate: no

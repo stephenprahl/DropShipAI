@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block title %}Find Opportunities - Super Arbitrage{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5">Find Arbitrage Opportunities</h1>
+        <p class="lead">Search for profitable products across different platforms.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Search Criteria</h5>
+            </div>
+            <div class="card-body">
+                <form id="searchForm" method="POST" action="{{ url_for('find') }}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="source" class="form-label">Source Platform</label>
+                            <select class="form-select" id="source" name="source" required>
+                                <option value="amazon" selected>Amazon</option>
+                                <option value="walmart">Walmart</option>
+                                <option value="aliexpress">AliExpress</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="target" class="form-label">Target Platform</label>
+                            <select class="form-select" id="target" name="target" required>
+                                <option value="ebay" selected>eBay</option>
+                                <option value="amazon">Amazon</option>
+                                <option value="etsy">Etsy</option>
+                                <option value="facebook">Facebook Marketplace</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="query" class="form-label">Product Search Query</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control form-control-lg" 
+                                       id="query" name="query" 
+                                       placeholder="e.g., wireless earbuds, smart watch" required>
+                            </div>
+                            <div class="form-text">Be specific for better results (brand, model, etc.)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="min_profit" class="form-label">Minimum Profit ($)</label>
+                            <input type="number" class="form-control" id="min_profit" 
+                                   name="min_profit" value="10.00" step="0.01" min="0" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="min_margin" class="form-label">Minimum Margin (%)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="min_margin" 
+                                       name="min_margin" value="20" min="0" max="1000" required>
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="max_results" class="form-label">Max Results</label>
+                            <select class="form-select" id="max_results" name="max_results">
+                                <option value="10">10</option>
+                                <option value="25" selected>25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <div class="col-12 mt-4">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="button" class="btn btn-outline-secondary me-md-2" id="resetBtn">
+                                    <i class="fas fa-undo me-1"></i> Reset
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="searchBtn">
+                                    <i class="fas fa-search-dollar me-1"></i> Find Opportunities
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Search Results (initially hidden) -->
+        <div id="searchResults" class="mt-4 d-none">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Search Results</h5>
+                <div class="text-muted">
+                    <span id="resultCount">0</span> opportunities found
+                    <span id="searchTime" class="ms-2"></span>
+                </div>
+            </div>
+            
+            <div id="resultsContainer" class="list-group">
+                <!-- Results will be loaded here via JavaScript -->
+                <div class="text-center py-5" id="loadingIndicator">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 mb-0">Searching for opportunities...</p>
+                </div>
+            </div>
+            
+            <div id="noResults" class="text-center py-5 d-none">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h5>No opportunities found</h5>
+                <p class="text-muted">Try adjusting your search criteria</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Search Tips -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Search Tips</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        <strong>Be specific</strong> - Include brand, model, and key features
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        <strong>Check competition</strong> - Look for products with less competition
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        <strong>Consider shipping</strong> - Factor in shipping costs and times
+                    </li>
+                    <li class="mb-0">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        <strong>Review return policies</strong> - Understand the terms before selling
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Recent Searches -->
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Recent Searches</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Wireless Earbuds</h6>
+                            <small>3 min ago</small>
+                        </div>
+                        <p class="mb-1 text-muted small">Amazon → eBay</p>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Smart Watch</h6>
+                            <small>17 min ago</small>
+                        </div>
+                        <p class="mb-1 text-muted small">Walmart → Facebook</p>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Phone Case</h6>
+                            <small>1 hour ago</small>
+                        </div>
+                        <p class="mb-1 text-muted small">AliExpress → Etsy</p>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Bluetooth Speaker</h6>
+                            <small>2 hours ago</small>
+                        </div>
+                        <p class="mb-1 text-muted small">Amazon → eBay</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('searchForm');
+    const searchResults = document.getElementById('searchResults');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const noResults = document.getElementById('noResults');
+    const resultCount = document.getElementById('resultCount');
+    const searchTime = document.getElementById('searchTime');
+    const resetBtn = document.getElementById('resetBtn');
+    const searchBtn = document.getElementById('searchBtn');
+    
+    // Handle form submission
+    searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Show loading state
+        searchResults.classList.remove('d-none');
+        loadingIndicator.classList.remove('d-none');
+        noResults.classList.add('d-none');
+        resultsContainer.innerHTML = '';
+        
+        // Disable search button during search
+        searchBtn.disabled = true;
+        searchBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Searching...';
+        
+        // Get form data
+        const formData = new FormData(searchForm);
+        const searchParams = new URLSearchParams();
+        
+        // Convert FormData to URLSearchParams
+        for (const [key, value] of formData.entries()) {
+            searchParams.append(key, value);
+        }
+        
+        // Start timer
+        const startTime = performance.now();
+        
+        // Send AJAX request
+        fetch(`/api/opportunities?${searchParams.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                // Calculate search time
+                const endTime = performance.now();
+                const searchDuration = ((endTime - startTime) / 1000).toFixed(2);
+                
+                // Update UI
+                resultCount.textContent = data.count;
+                searchTime.textContent = `(${searchDuration}s)`;
+                
+                // Hide loading indicator
+                loadingIndicator.classList.add('d-none');
+                
+                if (data.count > 0) {
+                    // Display results
+                    data.opportunities.forEach(opp => {
+                        const opportunityElement = createOpportunityCard(opp);
+                        resultsContainer.appendChild(opportunityElement);
+                    });
+                } else {
+                    // Show no results message
+                    noResults.classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Show error message
+                loadingIndicator.classList.add('d-none');
+                resultsContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        An error occurred while searching. Please try again.
+                    </div>
+                `;
+            })
+            .finally(() => {
+                // Re-enable search button
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = '<i class="fas fa-search-dollar me-1"></i> Find Opportunities';
+            });
+    });
+    
+    // Reset form
+    resetBtn.addEventListener('click', function() {
+        searchForm.reset();
+        searchResults.classList.add('d-none');
+    });
+    
+    // Create opportunity card element
+    function createOpportunityCard(opportunity) {
+        const card = document.createElement('div');
+        card.className = 'list-group-item list-group-item-action';
+        card.innerHTML = `
+            <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">${opportunity.title}</h6>
+                <span class="badge bg-success">$${opportunity.profit} profit</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <span class="text-muted small">Source:</span>
+                    <span class="fw-bold ms-1">${opportunity.source_price}</span>
+                </div>
+                <i class="fas fa-arrow-right text-muted"></i>
+                <div>
+                    <span class="text-muted small">Target:</span>
+                    <span class="fw-bold ms-1">${opportunity.target_price}</span>
+                </div>
+                <div class="ms-3">
+                    <span class="badge bg-info">${opportunity.profit_margin} margin</span>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="${opportunity.source_url}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-external-link-alt me-1"></i> View Product
+                </a>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-secondary" title="Save to Favorites">
+                        <i class="far fa-star"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" title="Track This Product">
+                        <i class="fas fa-bell"></i> Track
+                    </button>
+                </div>
+            </div>
+        `;
+        return card;
+    }
+});
+</script>
+{% endblock %}
