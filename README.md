@@ -10,14 +10,55 @@ An autonomous system for identifying and capitalizing on dropshipping arbitrage 
 - **Order Automation**: Process orders and handle fulfillment
 - **Smart Pricing**: Dynamic pricing based on market conditions
 - **Performance Analytics**: Track profits and optimize strategy
+- **Modern Database**: Built with SQLAlchemy ORM and Neon (PostgreSQL) for scalability and reliability
 
 ## 🛠️ Setup
 
+### Prerequisites
+
+- Python 3.8+
+- Neon (PostgreSQL) database account
+- Required API keys (Amazon, eBay, etc.)
+
+### Installation
+
 1. Clone the repository
-2. Install dependencies:
+   ```bash
+   git clone https://github.com/yourusername/super-arb.git
+   cd super-arb
+   ```
+
+2. Create and activate a virtual environment (recommended):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
+
+### Database Setup
+
+1. Sign up for a free [Neon](https://neon.tech/) account if you don't have one
+2. Create a new project and database in the Neon dashboard
+3. Copy your database connection string (it should look like `postgresql://username:password@hostname:5432/dbname`)
+4. Create a `.env` file in the project root and add your database URL:
+   ```env
+   DATABASE_URL=your_neon_connection_string_here
+   ```
+5. The database tables will be automatically created when you first run the application
+
+### Configuration
+
+Copy the `.env.example` file to `.env` and fill in your API keys and configuration:
+
+```bash
+cp .env.example .env
+```
+
+Edit the `.env` file with your actual API keys and configuration values.
 3. Configure your API keys in `.env` file
 4. Run the main script:
    ```bash
