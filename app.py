@@ -6,18 +6,77 @@ A Flask-based web application for the Super Arbitrage platform.
 import os
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import json
 from pathlib import Path
+import logging
+from logging.handlers import RotatingFileHandler
+
+# Import configuration
+from config import config
 
 # Import our arbitrage engine
 from src.arbitrage_engine import ArbitrageEngine, ArbitrageOpportunity
 
-# Initialize Flask app
-app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY') or 'dev-key-for-super-arbitrage'
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+# Initialize extensions
+db = SQLAlchemy()
+migrate = Migrate()
+login_manager = LoginManager()
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+)
+
+def create_app(config_name=None):
+    """Application factory function."""
+    if config_name is None:
+        config_name = os.getenv('FLASK_ENV', 'development')
+    
+    app = Flask(__name__)
+    
+    # Apply configuration
+    app.config.from_object(f'config.{config_name.capitalize()}Config')
+    
+    # Initialize extensions
+    db.init_app(app)
+    migrate.init_app(app, db)
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
+    limiter.init_app(app)
+    
+    # Register blueprints
+    from .auth import auth as auth_blueprint
+    from .main import main as main_blueprint
+    from .api import api as api_blueprint
+    
+    app.register_blueprint(auth_blueprint)
+    app.register_blueprint(main_blueprint)
+    app.register_blueprint(api_blueprint, url_prefix='/api/v1')
+    
+    # Configure logging
+    if not app.debug and not app.testing:
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/superarbitrage.log',
+                                         maxBytes=10240, backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s '
+            '[in %(pathname)s:%(lineno)d]'))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+        
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('Super Arbitrage startup')
+    
+    return app
+
+# Initialize the app
+app = create_app()
 
 # Initialize Flask-Login
 login_manager = LoginManager()
