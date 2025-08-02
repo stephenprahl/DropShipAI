@@ -1,10 +1,154 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect, url_for, flash
 from flask_cors import CORS
+from flask_login import LoginManager, UserMixin, login_user, login_required, current_user, logout_user
 import sqlite3
 import os
+import re
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
-app = Flask(__name__)
+# Calculate the paths relative to this file
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+
+app = Flask(__name__, 
+            template_folder=TEMPLATE_DIR,
+            static_folder=STATIC_DIR,
+            static_url_path='/static')
 CORS(app)
+app.secret_key = os.urandom(24)  # Required for session management
+
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+# User class for Flask-Login
+class User(UserMixin):
+    def __init__(self, id, username=None, email=None):
+        self.id = id
+        self.username = username
+        self.email = email
+
+@login_manager.user_loader
+def load_user(user_id):
+    conn = get_db_connection()
+    user = conn.execute('SELECT id, username, email FROM users WHERE id = ?', (user_id,)).fetchone()
+    conn.close()
+    if user is None:
+        return None
+    return User(id=user['id'], username=user['username'], email=user['email'])
+
+def get_user_by_username(username):
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+    conn.close()
+    return user
+
+def is_valid_username(username):
+    """Check if username contains only letters, numbers, and underscores."""
+    return bool(re.match(r'^\w+$', username))
+
+def is_valid_password(password):
+    """Check if password meets complexity requirements."""
+    return bool(re.match(r'^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$', password))
+
+def user_exists(username, email):
+    """Check if a user with the given username or email already exists."""
+    conn = get_db_connection()
+    user = conn.execute(
+        'SELECT id FROM users WHERE username = ? OR email = ?', 
+        (username, email)
+    ).fetchone()
+    conn.close()
+    return user is not None
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+        
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        
+        # Validate input
+        if not all([username, email, password]):
+            flash('All fields are required', 'error')
+        elif not is_valid_username(username):
+            flash('Username can only contain letters, numbers, and underscores', 'error')
+        elif not is_valid_password(password):
+            flash('Password must be at least 8 characters long and include uppercase, lowercase, and numbers', 'error')
+        elif user_exists(username, email):
+            flash('Username or email already exists', 'error')
+        else:
+            # Hash the password
+            password_hash = generate_password_hash(password)
+            
+            # Save to database
+            conn = get_db_connection()
+            try:
+                cursor = conn.cursor()
+                cursor.execute(
+                    'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
+                    (username, email, password_hash)
+                )
+                user_id = cursor.lastrowid
+                conn.commit()
+                
+                # Log the user in
+                user = User(id=user_id, username=username, email=email)
+                login_user(user)
+                flash('Registration successful!', 'success')
+                return redirect(url_for('dashboard'))
+                
+            except sqlite3.IntegrityError as e:
+                flash('An error occurred. Please try again.', 'error')
+                print(f"Database error: {e}")
+            finally:
+                conn.close()
+    
+    return render_template('register.html')
+
+# Login page
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+        
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        
+        if not username or not password:
+            flash('Please enter both username and password', 'error')
+        else:
+            # Get user from database
+            user_data = get_user_by_username(username)
+            
+            # Check if user exists and password is correct
+            if user_data and check_password_hash(user_data['password_hash'], password):
+                user = User(
+                    id=user_data['id'],
+                    username=user_data['username'],
+                    email=user_data['email']
+                )
+                login_user(user)
+                next_page = request.args.get('next')
+                return redirect(next_page or url_for('dashboard'))
+            else:
+                flash('Invalid username or password', 'error')
+    
+    return render_template('login.html')
+
+# Logout route
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 # Configuration
 DATABASE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'arbitrage.db')
@@ -16,7 +160,14 @@ def get_db_connection():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    return render_template('landing.html')
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
 
 @app.route('/api/opportunities')
 def get_opportunities():

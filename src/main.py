@@ -26,7 +26,7 @@ def main():
     setup_directories()
     
     if args.query:
-        from scraping.amazon_scraper import AmazonScraper
+        from src.scraping.amazon_scraper import AmazonScraper
         
         logger.info(f"Searching for: {args.query}")
         scraper = AmazonScraper()
