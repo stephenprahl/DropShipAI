@@ -3,82 +3,56 @@
 {% block title %}Dashboard - Super Arbitrage{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <h1 class="display-5">Dashboard</h1>
-        <p class="lead">Welcome back, {{ current_user.username }}! Here's your arbitrage overview.</p>
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5">Dashboard</h1>
+            <p class="lead">Welcome back, {{ current_user.username }}! Here's your arbitrage overview.</p>
+        </div>
     </div>
-</div>
 
-<!-- Stats Cards -->
-<div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card bg-primary text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase">Total Opportunities</h6>
-                        <h2 class="mb-0">{{ opportunities|length }}</h2>
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase">Getting Started</h6>
+                            <p class="mb-0">Welcome to Super Arbitrage! This is a placeholder dashboard.</p>
+                        </div>
+                        <i class="fas fa-rocket fa-3x opacity-50"></i>
                     </div>
-                    <i class="fas fa-chart-line fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase">Next Steps</h6>
+                            <p class="mb-0">Configure your settings and start finding opportunities!</p>
+                        </div>
+                        <i class="fas fa-cog fa-3x opacity-50"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3 mb-3">
-        <div class="card bg-success text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase">Avg. Profit</h6>
-                        <h2 class="mb-0">${{ "%0.2f"|format(opportunities|map(attribute='profit')|sum / (opportunities|length or 1)) }}</h2>
-                    </div>
-                    <i class="fas fa-dollar-sign fa-3x opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-3">
-        <div class="card bg-info text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase">Avg. Margin</h6>
-                        <h2 class="mb-0">{{ "%0.1f"|format(opportunities|map(attribute='profit_margin')|sum / (opportunities|length or 1)) }}%</h2>
-                    </div>
-                    <i class="fas fa-percentage fa-3x opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-3">
-        <div class="card bg-warning text-dark h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase">Active Searches</h6>
-                        <h2 class="mb-0">3</h2>
-                    </div>
-                    <i class="fas fa-search fa-3x opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Quick Actions -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Quick Actions</h5>
-            </div>
-            <div class="card-body">
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="{{ url_for('find') }}" class="btn btn-primary">
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="#" class="btn btn-primary me-2">
                         <i class="fas fa-search-dollar me-2"></i>Find New Opportunities
                     </a>
-                    <a href="#" class="btn btn-outline-secondary">
+                    <a href="#" class="btn btn-outline-secondary me-2">
                         <i class="fas fa-cog me-2"></i>Settings
                     </a>
                     <a href="#" class="btn btn-outline-info">
@@ -88,92 +62,28 @@
             </div>
         </div>
     </div>
-</div>
 
-<!-- Recent Opportunities -->
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                <h5 class="mb-0">Recent Opportunities</h5>
-                <a href="{{ url_for('opportunities') }}" class="btn btn-sm btn-outline-primary">View All</a>
-            </div>
-            <div class="card-body p-0">
-                {% if opportunities %}
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Source</th>
-                                    <th>Target</th>
-                                    <th>Profit</th>
-                                    <th>Margin</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for opp in opportunities %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="{{ opp.source_product.get('image_url', url_for('static', filename='images/placeholder.png')) }}" 
-                                                 class="rounded me-2 product-image" width="40" height="40" 
-                                                 onerror="handleImageError(this)"
-                                                 alt="Product image">
-                                            <div>
-                                                <h6 class="mb-0">{{ opp.source_product.title[:50] }}{% if opp.source_product.title|length > 50 %}...{% endif %}</h6>
-                                                <small class="text-muted">{{ opp.timestamp }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>${{ "%.2f"|format(opp.source_product.price) }}</td>
-                                    <td>${{ "%.2f"|format(opp.target_price) }}</td>
-                                    <td class="text-success">${{ "%.2f"|format(opp.profit) }}</td>
-                                    <td class="text-success">{{ "%.1f"|format(opp.profit_margin) }}%</td>
-                                    <td>
-                                        <a href="{{ opp.source_product.url }}" target="_blank" class="btn btn-sm btn-outline-primary" title="View Source">
-                                            <i class="fas fa-external-link-alt"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-success" title="Save to Favorites">
-                                            <i class="far fa-star"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+    <!-- Getting Started -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Getting Started</h5>
+                </div>
+                <div class="card-body">
+                    <p>To get started with Super Arbitrage:</p>
+                    <ol>
+                        <li>Configure your API keys in the <code>.env</code> file</li>
+                        <li>Set up your database connection</li>
+                        <li>Start finding arbitrage opportunities</li>
+                    </ol>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Check the documentation for detailed setup instructions.
                     </div>
-                {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                        <h5>No recent opportunities found</h5>
-                        <p class="text-muted">Start by searching for new opportunities</p>
-                        <a href="{{ url_for('find') }}" class="btn btn-primary">
-                            <i class="fas fa-search-dollar me-2"></i>Find Opportunities
-                        </a>
-                    </div>
-                {% endif %}
+                </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Handle image loading errors
-    function handleImageError(img) {
-        img.onerror = null; // Prevent infinite loop in case the fallback image also fails
-        img.src = '{{ url_for("static", filename="images/placeholder.png") | safe }}';
-    }
-
-    // Initialize tooltips
-    document.addEventListener('DOMContentLoaded', function() {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    });
-</script>
 {% endblock %}

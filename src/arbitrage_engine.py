@@ -9,9 +9,9 @@ import json
 import os
 from pathlib import Path
 
-from scraping.amazon_scraper import AmazonScraper, Product as AmazonProduct
-from scraping.ebay_scraper import EBayScraper, EBayProduct
-from analysis.profit_calculator import ProfitCalculator
+from src.scraping.amazon_scraper import AmazonScraper, Product as AmazonProduct
+from src.scraping.ebay_scraper import EBayScraper, EBayProduct
+from src.analysis.profit_calculator import ProfitCalculator
 
 logger = logging.getLogger(__name__)
 

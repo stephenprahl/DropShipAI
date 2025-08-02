@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to Super Arbitrage{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold mb-4">Supercharge Your Arbitrage Business</h1>
+            <p class="lead mb-4">Discover profitable opportunities across multiple marketplaces with our AI-powered arbitrage platform.</p>
+            <div class="d-grid gap-2 d-md-flex">
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg px-4 me-md-2">
+                    <i class="fas fa-sign-in-alt me-2"></i> Sign In
+                </a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline-secondary btn-lg px-4">
+                    <i class="fas fa-user-plus me-2"></i> Create Account
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <img src="{{ url_for('static', filename='images/arbitrage-illustration.svg') }}" 
+                 alt="Arbitrage illustration" 
+                 class="img-fluid"
+                 onerror="this.src='{{ url_for('static', filename='images/placeholder.png') }}';">
+        </div>
+    </div>
+
+    <div class="row mt-5 pt-5">
+        <div class="col-12 text-center mb-5">
+            <h2>How It Works</h2>
+            <p class="lead">Start making smarter arbitrage decisions in minutes</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-search-dollar fa-2x text-primary"></i>
+                    </div>
+                    <h4>Find Deals</h4>
+                    <p class="text-muted">Scan multiple marketplaces for profitable arbitrage opportunities in real-time.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-chart-line fa-2x text-success"></i>
+                    </div>
+                    <h4>Analyze Profit</h4>
+                    <p class="text-muted">Get detailed profit calculations including fees, shipping, and more.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-robot fa-2x text-info"></i>
+                    </div>
+                    <h4>Automate</h4>
+                    <p class="text-muted">Let our AI handle the heavy lifting and notify you of the best deals.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add any landing page specific JavaScript here
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}
