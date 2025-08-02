@@ -169,6 +169,16 @@ def index():
 def dashboard():
     return render_template('dashboard.html')
 
+@app.route('/find')
+@login_required
+def find():
+    return render_template('find.html')
+
+@app.route('/opportunities')
+@login_required
+def opportunities():
+    return render_template('opportunities.html')
+
 @app.route('/api/opportunities')
 def get_opportunities():
     min_profit = request.args.get('min_profit', 20, type=float)
